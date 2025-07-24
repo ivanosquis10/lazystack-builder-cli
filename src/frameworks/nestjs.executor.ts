@@ -2,6 +2,8 @@ import { execSync } from 'node:child_process'
 import * as fs from 'node:fs'
 import * as path from 'node:path'
 import colors from 'picocolors'
+import fsExtra from 'fs-extra'
+
 import type { NestjsPromptResult } from './nestjs.init'
 
 const biomePackageManager = {
@@ -75,9 +77,107 @@ export class NestjsProjectExecutor {
 				// 	)
 				// 	console.log(colors.green('Archivo biome.json creado.'))
 				// }
+
+				// 4. Eliminar archivos de ESLint y Prettier
+				const filesToRemove = [
+					'.eslintrc.js',
+					'.eslintrc.json',
+					'.eslintignore',
+					'.prettierrc',
+					'.prettierrc.js',
+					'.prettierrc.json',
+					'.prettierignore',
+				]
+
+				for (const file of filesToRemove) {
+					const filePath = path.join(projectName, file)
+					if (fs.existsSync(filePath)) {
+						fs.rmSync(filePath)
+						console.log(colors.yellow(`Archivo ${file} eliminado.`))
+					}
+				}
+
+				// 5. Eliminar dependencias de ESLint y Prettier del package.json
+				const pkgPath = path.join(projectName, 'package.json')
+				if (fs.existsSync(pkgPath)) {
+					const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf-8'))
+					const deps = [
+						'eslint',
+						'@nestjs/eslint-plugin',
+						'@typescript-eslint/eslint-plugin',
+						'@typescript-eslint/parser',
+						'prettier',
+						'eslint-config-prettier',
+						'eslint-plugin-prettier',
+					]
+					for (const dep of deps) {
+						if (pkg.devDependencies ?? pkg.devDependencies[dep]) {
+							delete pkg.devDependencies[dep]
+						}
+						if (pkg.dependencies ?? pkg.dependencies[dep]) {
+							delete pkg.dependencies[dep]
+						}
+					}
+					fs.writeFileSync(pkgPath, JSON.stringify(pkg, null, 2))
+					console.log(
+						colors.yellow(
+							'Dependencias de ESLint y Prettier eliminadas de package.json.',
+						),
+					)
+				}
 			} catch (err) {
 				console.error(colors.red('Error al instalar Biome:'), err)
 			}
 		}
+	}
+}
+
+export class NestjsPredefinedProjectGenerator {
+	async generate({
+		projectName,
+		packageManager,
+	}: {
+		projectName: string
+		packageManager: string
+	}) {
+		// const templateDir = path.resolve(__dirname, '../templates/backend/nestjs')
+		const templateDir = path.resolve(
+			process.cwd(),
+			'src/templates/backend/nestjs',
+		)
+		const targetDir = path.resolve(process.cwd(), projectName)
+
+		// 1. Copiar el template completo
+		if (fs.existsSync(targetDir)) {
+			throw new Error(`La carpeta '${projectName}' ya existe.`)
+		}
+		await fsExtra.copy(templateDir, targetDir)
+		console.log(colors.green(`Proyecto NestJS copiado a '${projectName}'.`))
+
+		// 2. Renombrar archivos .hbs a su nombre real (por ejemplo, package.json.hbs -> package.json)
+		const filesToRename = [
+			'package.json.hbs',
+			'tsconfig.json.hbs',
+			'tsconfig.build.json.hbs',
+		]
+		for (const file of filesToRename) {
+			const src = path.join(targetDir, file)
+			if (fs.existsSync(src)) {
+				const dest = src.replace(/\.hbs$/, '')
+				await fsExtra.move(src, dest, { overwrite: true })
+			}
+		}
+
+		// 3. Instalar dependencias
+		console.log(colors.cyan('Instalando dependencias...'))
+		execSync(`${packageManager} install`, { cwd: targetDir, stdio: 'inherit' })
+		console.log(colors.green('Dependencias instaladas.'))
+
+		// 4. Mensaje final
+		console.log(
+			colors.green(
+				'¡Proyecto NestJS predefinido generado exitosamente con Biome!',
+			),
+		)
 	}
 }
