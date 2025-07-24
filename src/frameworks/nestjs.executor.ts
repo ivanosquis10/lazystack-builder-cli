@@ -57,7 +57,7 @@ export class NestjsProjectExecutor {
 				})
 				console.log(colors.green('Biome instalado.'))
 				// Opcional: crear un archivo de configuración básico
-				execSync(biomeInitCommand[packageManager])
+				// execSync(biomeInitCommand[packageManager])
 
 				// const biomeConfigPath = path.join(projectName, 'biome.json')
 				// if (!fs.existsSync(biomeConfigPath)) {
