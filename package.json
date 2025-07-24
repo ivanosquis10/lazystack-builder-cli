@@ -1,7 +1,7 @@
 {
-	"name": "first-cli",
+	"name": "lazy-stack-builder",
 	"version": "1.0.0",
-	"description": "",
+	"description": "A CLI tool to build a lazy stack with TypeScript, Node.js, and Clack prompts",
 	"type": "module",
 	"main": "dist/index.js",
 	"scripts": {
@@ -14,8 +14,19 @@
 	"bin": {
 		"first-cli": "./dist/index.js"
 	},
-	"keywords": [],
-	"author": "",
+	"keywords": [
+		"cli",
+		"typescript",
+		"nodejs",
+		"clack-prompts",
+		"lazy-stack-builder",
+		"tsdown",
+		"biome",
+		"prompts",
+		"command-line-tool",
+		"nestjs"
+	],
+	"author": "ivanosquis10",
 	"license": "MIT",
 	"dependencies": {
 		"@clack/prompts": "^0.11.0",
