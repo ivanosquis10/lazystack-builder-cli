@@ -9,7 +9,7 @@ enum Framework {
 }
 
 async function main(): Promise<void> {
-	p.intro(colors.green('Bienvenido al CLI BUILDER of frameworks!'))
+	p.intro(colors.green('Lazy-stack-builder CLI!'))
 
 	const framework = await p.select({
 		message: 'Selecciona el framework que deseas usar:',
@@ -26,7 +26,7 @@ async function main(): Promise<void> {
 		return
 	}
 
-	p.outro(colors.yellow('¡Gracias por usar el Clack CLI! Hasta luego.'))
+	p.outro(colors.yellow('¡Gracias por usar Lazy-stack-builder CLI!'))
 }
 
 main().catch((error: Error) => {
